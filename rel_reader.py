@@ -892,7 +892,7 @@ if __name__ == "__main__":
 			elif TYPE == 0x10:
 				# storage directive
 
-				_dat, _size = get_bytes(dat, 1) 
+				dat, _size = get_bytes(dat, 1) 
 				size = _size & 0x7f
 
 				#dat = dat[2:]
