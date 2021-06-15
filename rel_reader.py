@@ -2,7 +2,7 @@
 #   REL file debugger  #
 #       by MrL314      #
 #                      #
-#     Jun 14, 2021     #
+#     Jun 15, 2021     #
 ########################
 
 
@@ -27,6 +27,7 @@ if __name__ == "__main__":
 	parser.add_argument("--hideops", action="store_true", help="Hides assumed opcode mnemonics, and instead shows raw byte value. Default shows mnemonics.")
 	parser.add_argument("--ws", action="store_true", help="Shows whitespace lines where there is no code in the code output.")
 	parser.add_argument("--header", action="store_true", help="Displays only the header data for the rel file.")
+	parser.add_argument("--legacy_off", action="store_true", help="Disables concatenation of 0D 0A pairs. Old REL format requires that 0D 0A be shortened to 0A when parsing.")
 
 
 	args = parser.parse_args()
@@ -42,6 +43,10 @@ if __name__ == "__main__":
 	HEADER_ONLY = False
 	if args.header:
 		HEADER_ONLY = True
+
+	LEGACY_MODE = True
+	if args.legacy_off:
+		LEGACY_MODE = False
 
 	ARGS = vars(args)
 
@@ -102,9 +107,10 @@ if __name__ == "__main__":
 		read_size = 0
 		
 		while out_n < n and read_size < len(buf):
-			if buf[read_size] == 0x0d:
-				if read_size < len(buf)-1 and buf[read_size+1] == 0x0a:
-					read_size += 1
+			if LEGACY_MODE:
+				if buf[read_size] == 0x0d:
+					if read_size < len(buf)-1 and buf[read_size+1] == 0x0a:
+						read_size += 1
 			out_buf.append(buf[read_size])
 			out_n += 1
 			read_size += 1
