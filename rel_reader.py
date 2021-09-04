@@ -615,7 +615,7 @@ if __name__ == "__main__":
 				dat, _txt = get_bytes(dat, 8)
 
 				#print("External Value   " + list_to_string(dat[ind:ind+8]).replace(" ", ""))
-				print("GLB   ", NAME, ";  value ", list_to_string(_txt).replace(" ", "")[-6:])
+				print("GLB   ", NAME.ljust(20), "     ; = ", list_to_string(_txt).replace(" ", "")[-6:])
 				GLOBALVARS.append(NAME)
 				#ind += 8
 
@@ -691,9 +691,11 @@ if __name__ == "__main__":
 
 
 			if TYPE == 1:
-				dat, data1  = get_bytes(dat, 8)
-				dat, data2  = get_bytes(dat, 25)
-				dat, offset = get_bytes(dat, 2)
+				dat, data1    = get_bytes(dat, 8)
+				dat, _        = get_bytes(dat, 1)
+				dat, _        = get_bytes(dat, 18)
+				dat, location = get_bytes(dat, 4)
+				dat, offset   = get_bytes(dat, 4)
 
 				#dat = dat[35:]
 
@@ -708,9 +710,10 @@ if __name__ == "__main__":
 				offset = dat[32:35]
 				'''
 				dat, data1    = get_bytes(dat, 8)
-				dat, _        = get_bytes(dat, 21)
-				dat, location = get_bytes(dat, 3)
-				dat, offset   = get_bytes(dat, 3)
+				dat, _        = get_bytes(dat, 1)
+				dat, _        = get_bytes(dat, 18)
+				dat, location = get_bytes(dat, 4)
+				dat, offset   = get_bytes(dat, 4)
 
 				#dat = dat[35:]
 
@@ -722,9 +725,11 @@ if __name__ == "__main__":
 				#data2 = dat[8:33]
 				#offset = dat[33:35]
 
-				dat, data1  = get_bytes(dat, 8)
-				dat, data2  = get_bytes(dat, 25)
-				dat, offset = get_bytes(dat, 2)
+				dat, data1    = get_bytes(dat, 8)
+				dat, _        = get_bytes(dat, 1)
+				dat, _        = get_bytes(dat, 18)
+				dat, location = get_bytes(dat, 4)
+				dat, offset   = get_bytes(dat, 4)
 
 				#dat = dat[35:]
 
@@ -982,7 +987,8 @@ if __name__ == "__main__":
 					ADD_TO_BUFF(", ", end="")
 
 
-				if section[0] & 0xf > 0:
+				#if section[0] & 0xf > 0:
+				if section[0] & 0x7 > 0:
 					#section with offset
 
 					line_name = get_section_name(section) + "::" + list_to_string(offset[1:]).replace(" ", "").upper()
@@ -1030,8 +1036,14 @@ if __name__ == "__main__":
 
 				if is_external:
 					offs = list_to_int(offset)
+
+					if offs >= 0x80000000: offs = offs - 0x100000000
+
 					if offs != 0:
-						ADD_TO_BUFF("+ " + hex(offs)[2:] + "h ", end="")
+						if offs < 0:
+							ADD_TO_BUFF("- " + hex(offs)[3:] + "h ", end="")
+						else:
+							ADD_TO_BUFF("+ " + hex(offs)[2:] + "h ", end="")
 
 				is_list = True
 
@@ -1039,6 +1051,9 @@ if __name__ == "__main__":
 				ADD_TO_BUFF("")
 				raise KeyError("Unintentionally hit " + format(TYPE, "02x"))
 				break
+
+		if LINE_BUFFER != "":
+			print("\n" + format(int(line_num, 16) + 1, "04x") + ": " + LINE_BUFFER, end="")
 
 		if dat[0] == 0 and dat[1] == 0:
 			print("\n; 00 00")
@@ -1077,7 +1092,7 @@ if __name__ == "__main__":
 		dat, MONTH   = get_bytes(dat, 1)
 		dat, DAY     = get_bytes(dat, 1)
 		dat, WEEKDAY = get_bytes(dat, 1)
-		print("ASSEMBLY DATE: " + WEEKDAYS[WEEKDAY] + " " + MONTHS[MONTH] + " " + format(DAY, "02d") + ", " + str(1900 + YEAR))
+		print("ASSEMBLY DATE: " + WEEKDAYS[WEEKDAY] + " " + MONTHS[MONTH] + " " + format(DAY, "02d") + ", XX" + str(YEAR))
 		#dat = dat[4:]
 
 
